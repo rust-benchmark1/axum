@@ -1,0 +1,44 @@
+# Rust
+target/
+Cargo.lock
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile*
+.dockerignore
+
+# Documentation
+*.md
+docs/
+
+# CI/CD
+.github/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+
+# Examples build artifacts
+examples/*/target/
+
+# Test artifacts
+test_output/
+coverage/ 

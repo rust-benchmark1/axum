@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Desenvolvimento
+  axum-dev:
+    build:
+      context: .
+      target: development
+    volumes:
+      - .:/app
+      - cargo-cache:/usr/local/cargo/registry
+    ports:
+      - "3000:3000"
+    environment:
+      - RUST_LOG=debug
+      - RUST_BACKTRACE=1
+    stdin_open: true
+    tty: true
+
+  # Build do projeto
+  axum-build:
+    build:
+      context: .
+      target: builder
+    volumes:
+      - ./target:/app/target
+
+  # Executar testes
+  axum-test:
+    build:
+      context: .
+      target: test
+    volumes:
+      - ./target:/app/target
+    environment:
+      - RUST_LOG=info
+      - RUST_BACKTRACE=1
+
+  # Gerar documentação
+  axum-docs:
+    build:
+      context: .
+      target: docs
+    volumes:
+      - ./target/doc:/app/target/doc
+    ports:
+      - "8080:8080"
+    command: |
+      sh -c "
+        cargo doc --workspace --no-deps &&
+        cd target/doc &&
+        python3 -m http.server 8080
+      "
+
+  # Exemplo hello-world
+  example-hello:
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "3001:3000"
+    working_dir: /app
+    command: ./target/release/examples/hello-world
+
+  # Exemplo WebSocket
+  example-websocket:
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "3002:3000"
+    working_dir: /app
+    command: ./target/release/examples/websockets
+
+volumes:
+  cargo-cache: 
