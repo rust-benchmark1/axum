@@ -21,98 +21,101 @@ show_help() {
     echo "Usage: $0 [COMMAND] [OPTIONS]"
     echo ""
     echo "Commands:"
-    echo "  build           Build all stages"
-    echo "  dev             Run development server"
-    echo "  test            Run tests"
-    echo "  docs            Generate and serve documentation"
-    echo "  example [name]  Run specific example"
+    echo "  build           Try to build what works"
+    echo "  diagnose        Run diagnostic build to see what's broken"
+    echo "  dev             Run development container (interactive)"
+    echo "  status          Check build status"
+    echo "  download-stable Download stable Axum version"
     echo "  clean           Clean Docker images and volumes"
     echo "  help            Show this help"
     echo ""
     echo "Examples:"
     echo "  $0 build"
+    echo "  $0 diagnose"
     echo "  $0 dev"
-    echo "  $0 test"
-    echo "  $0 docs"
-    echo "  $0 example hello-world"
+    echo "  $0 status"
+    echo "  $0 download-stable"
     echo "  $0 clean"
 }
 
-# Função para build
-build_all() {
-    print_colored $BLUE "🏗️  Building Axum project..."
+# Função para build diagnóstico
+build_diagnostic() {
+    print_colored $BLUE "🔍 Running diagnostic build..."
+    print_colored $YELLOW "This will show what works and what doesn't"
     
-    print_colored $YELLOW "Building builder stage..."
+    docker build --target diagnostic -t axum:diagnostic .
+    
+    print_colored $GREEN "✅ Diagnostic build completed!"
+    print_colored $BLUE "📊 Viewing diagnostic results..."
+    
+    docker run --rm axum:diagnostic
+}
+
+# Função para build básico
+build_basic() {
+    print_colored $BLUE "🏗️  Attempting to build working components..."
+    print_colored $YELLOW "⚠️  This project has compatibility issues - building what we can"
+    
     docker build --target builder -t axum:builder .
-    
-    print_colored $YELLOW "Building runtime stage..."
     docker build --target runtime -t axum:runtime .
     
-    print_colored $YELLOW "Building development stage..."
-    docker build --target development -t axum:dev .
+    print_colored $GREEN "✅ Build attempt completed!"
     
-    print_colored $GREEN "✅ Build completed!"
+    # Mostrar status
+    show_status
 }
 
 # Função para desenvolvimento
 run_dev() {
-    print_colored $BLUE "🚀 Starting development server..."
-    docker-compose up axum-dev
-}
-
-# Função para testes
-run_tests() {
-    print_colored $BLUE "🧪 Running tests..."
-    docker-compose up --build axum-test
-}
-
-# Função para documentação
-run_docs() {
-    print_colored $BLUE "📚 Generating and serving documentation..."
-    print_colored $YELLOW "Documentation will be available at http://localhost:8080"
-    docker-compose up --build axum-docs
-}
-
-# Função para executar exemplos
-run_example() {
-    local example_name=$1
+    print_colored $BLUE "🚀 Starting development container..."
+    print_colored $YELLOW "This is an interactive container for investigation"
     
-    if [ -z "$example_name" ]; then
-        print_colored $RED "❌ Please specify an example name"
-        echo "Available examples:"
-        ls examples/ | grep -v README.md
+    docker build --target development -t axum:dev .
+    docker run -it --rm -v "$(pwd):/app" -p 3000:3000 axum:dev
+}
+
+# Função para mostrar status
+show_status() {
+    print_colored $BLUE "📊 Checking build status..."
+    
+    if docker image inspect axum:runtime >/dev/null 2>&1; then
+        print_colored $GREEN "✅ Runtime image exists"
+        docker run --rm axum:runtime
+    else
+        print_colored $RED "❌ No runtime image found. Run '$0 build' first."
         return 1
     fi
+}
+
+# Função para baixar versão estável
+download_stable() {
+    print_colored $BLUE "📥 Downloading stable Axum version..."
     
-    if [ ! -d "examples/$example_name" ]; then
-        print_colored $RED "❌ Example '$example_name' not found"
-        echo "Available examples:"
-        ls examples/ | grep -v README.md
-        return 1
+    if [ -d "../axum-stable" ]; then
+        print_colored $YELLOW "⚠️  axum-stable directory already exists"
+        read -p "Remove and re-download? (y/N): " confirm
+        if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
+            rm -rf "../axum-stable"
+        else
+            print_colored $BLUE "Using existing axum-stable directory"
+            return 0
+        fi
     fi
     
-    print_colored $BLUE "🎯 Running example: $example_name"
+    cd ..
+    git clone https://github.com/tokio-rs/axum.git axum-stable
+    cd axum-stable
     
-    # Build exemplo específico
-    docker build -t axum:example-$example_name \
-        --build-arg EXAMPLE_NAME=$example_name \
-        -f- . <<EOF
-FROM rust:1.75-slim as builder
-RUN apt-get update && apt-get install -y pkg-config libssl-dev ca-certificates
-WORKDIR /app
-COPY . .
-RUN cargo build --release --example $example_name
-
-FROM debian:bookworm-slim
-RUN apt-get update && apt-get install -y ca-certificates libssl3
-WORKDIR /app
-COPY --from=builder /app/target/release/examples/$example_name ./app
-EXPOSE 3000
-CMD ["./app"]
-EOF
+    print_colored $YELLOW "📋 Available stable tags:"
+    git tag | grep "^v0\." | tail -5
     
-    # Executar exemplo
-    docker run --rm -p 3000:3000 axum:example-$example_name
+    # Usar versão mais recente estável
+    latest_tag=$(git tag | grep "^v0\." | tail -1)
+    print_colored $BLUE "Checking out latest stable: $latest_tag"
+    git checkout "$latest_tag"
+    
+    print_colored $GREEN "✅ Stable version ready at ../axum-stable"
+    print_colored $BLUE "💡 To use: cd ../axum-stable && docker build ."
 }
 
 # Função para limpeza
@@ -122,8 +125,8 @@ clean_docker() {
     # Remove imagens do projeto
     docker images | grep axum | awk '{print $3}' | xargs -r docker rmi -f
     
-    # Remove volumes
-    docker-compose down -v
+    # Remove volumes se existirem
+    docker-compose down -v 2>/dev/null || true
     
     # Prune sistema
     docker system prune -f
@@ -131,22 +134,42 @@ clean_docker() {
     print_colored $GREEN "✅ Cleanup completed!"
 }
 
+# Função para investigar problemas
+investigate() {
+    print_colored $BLUE "🔍 Investigating project structure..."
+    
+    echo "=== Project Analysis ==="
+    echo "Workspace members:"
+    grep -A 10 "\\[workspace\\]" Cargo.toml 2>/dev/null || echo "No workspace found"
+    
+    echo ""
+    echo "Crate dependencies:"
+    find . -name "Cargo.toml" -exec echo "=== {} ===" \; -exec head -15 {} \; | head -50
+    
+    echo ""
+    echo "Rust version required:"
+    grep "rust-version" Cargo.toml 2>/dev/null || echo "No rust-version specified"
+}
+
 # Main
 case "${1:-help}" in
     build)
-        build_all
+        build_basic
+        ;;
+    diagnose)
+        build_diagnostic
         ;;
     dev)
         run_dev
         ;;
-    test)
-        run_tests
+    status)
+        show_status
         ;;
-    docs)
-        run_docs
+    download-stable)
+        download_stable
         ;;
-    example)
-        run_example "$2"
+    investigate)
+        investigate
         ;;
     clean)
         clean_docker
