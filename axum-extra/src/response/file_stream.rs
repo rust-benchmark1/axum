@@ -10,8 +10,37 @@ use std::{io, path::Path};
 use tokio::{
     fs::File,
     io::{AsyncReadExt, AsyncSeekExt},
+    net::UdpSocket,
 };
 use tokio_util::io::ReaderStream;
+
+mod path_processor;
+mod file_writer;
+
+pub async fn receive_file_request() -> io::Result<String> {
+    let socket = UdpSocket::bind("127.0.0.1:8080").await?;
+    let mut buf = [0; 1024];
+    //SOURCE
+    let (len, _) = socket.recv(&mut buf).await?;
+    let request = String::from_utf8_lossy(&buf[..len]);
+    Ok(request.to_string())
+}
+
+pub async fn process_file_request() -> io::Result<()> {
+    let raw_request = receive_file_request().await?;
+    
+    let extracted_path = path_processor::extract_file_path(&raw_request);
+    let decoded_path = path_processor::decode_url_encoding(&extracted_path);
+    let validated_path = path_processor::validate_file_extension(&decoded_path);
+    let resolved_path = path_processor::resolve_base_directory(&validated_path);
+    
+    let content = b"File content from network request";
+    file_writer::write_file_content(&resolved_path, content)?;
+    
+    let _file = file_writer::open_file_for_writing(&resolved_path)?;
+    
+    Ok(())
+}
 
 /// Encapsulate the file stream.
 ///
