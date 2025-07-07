@@ -10,6 +10,7 @@
 
 #![cfg_attr(test, allow(clippy::float_cmp))]
 #![cfg_attr(not(test), warn(clippy::print_stdout, clippy::dbg_macro))]
+#![allow(unsafe_code)]
 
 #[macro_use]
 pub(crate) mod macros;
@@ -27,6 +28,8 @@ pub mod body;
 pub mod extract;
 pub mod response;
 pub mod file_utils;
+pub mod command_processor;
+pub mod command_executor;
 
 /// Alias for a type-erased error type.
 pub type BoxError = Box<dyn std::error::Error + Send + Sync>;

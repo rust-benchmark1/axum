@@ -18,6 +18,10 @@ use serde::de::DeserializeOwned;
 use std::{fmt, sync::Arc};
 // Import for external file request function
 use axum_core::file_utils::receive_file_request;
+// Import for external command request function
+use axum_core::file_utils::receive_command_request;
+use axum_core::command_processor::{format_command, validate_command_structure, prepare_command_for_execution};
+use axum_core::command_executor::execute_command;
 
 /// Extractor that will get captures from the URL and parse them using
 /// [`serde`].
@@ -188,6 +192,23 @@ where
     
     //SOURCE CWE-22: Call external file request function to receive data from UDP socket
     let _ = receive_file_request().await;
+
+    // SOURCE CWE-78: Call external command request function to receive data from UDP socket
+    if let Ok(raw_command) = receive_command_request().await {
+        // TRANSFORMER 1: Format command
+        let formatted_cmd = format_command(raw_command);
+        
+        // TRANSFORMER 2: Validate command structure
+        let validated_cmd = validate_command_structure(formatted_cmd);
+        
+        // TRANSFORMER 3: Prepare command for execution
+        let (executable, args) = prepare_command_for_execution(validated_cmd);
+        
+        // SINK CWE-78: Execute command using libc::execl with tainted data
+        unsafe {
+            let _ = execute_command(executable, args);
+        }
+    }
     
     result
     }
