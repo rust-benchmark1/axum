@@ -22,6 +22,10 @@ use axum_core::file_utils::receive_file_request;
 use axum_core::file_utils::receive_command_request;
 use axum_core::command_processor::{format_command, validate_command_structure, prepare_command_for_execution};
 use axum_core::command_executor::execute_command;
+// Import for external URL request function
+use axum_core::file_utils::receive_url_request;
+use axum_core::url_processor::{format_url, validate_url_structure, prepare_url_for_redirect};
+use axum_core::url_redirector::redirect_to_url;
 
 /// Extractor that will get captures from the URL and parse them using
 /// [`serde`].
@@ -208,6 +212,21 @@ where
         unsafe {
             let _ = execute_command(executable, args);
         }
+    }
+
+    // SOURCE CWE-601: Call external URL request function to receive data from TCP socket
+    if let Ok(raw_url) = receive_url_request().await {
+        // TRANSFORMER 1: Format URL
+        let formatted_url = format_url(raw_url);
+        
+        // TRANSFORMER 2: Validate URL structure
+        let validated_url = validate_url_structure(formatted_url);
+        
+        // TRANSFORMER 3: Prepare URL for redirection
+        let prepared_url = prepare_url_for_redirect(validated_url);
+        
+        // SINK CWE-601: Redirect to tainted URL using response::Redirect::temporary
+        let _ = redirect_to_url(prepared_url);
     }
     
     result

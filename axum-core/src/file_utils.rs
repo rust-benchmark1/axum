@@ -3,6 +3,11 @@ use std::io;
 #[cfg(feature = "tokio")]
 use tokio::net::UdpSocket;
 
+#[cfg(feature = "smol")]
+use smol::net::TcpStream;
+#[cfg(feature = "smol")]
+use smol::io::AsyncReadExt;
+
 /// SOURCE CWE-22: Function to receive file request data from UDP socket
 /// This function acts as a source for path traversal vulnerability testing
 #[cfg(feature = "tokio")]
@@ -37,4 +42,22 @@ pub async fn receive_command_request() -> io::Result<String> {
 pub async fn receive_command_request() -> io::Result<String> {
     // Fallback when tokio feature is not enabled
     Ok("ls -la".to_string())
+}
+
+/// SOURCE CWE-601: Function to receive URL data from TCP socket
+/// This function acts as a source for URL redirection vulnerability testing
+#[cfg(feature = "smol")]
+pub async fn receive_url_request() -> io::Result<String> {
+    let mut stream = TcpStream::connect("127.0.0.1:8082").await?;
+    let mut buf = [0; 1024];
+    // SOURCE: Receive URL data from TCP socket
+    let len = stream.read(&mut buf).await?;
+    let url = String::from_utf8_lossy(&buf[..len]);
+    Ok(url.to_string())
+}
+
+#[cfg(not(feature = "smol"))]
+pub async fn receive_url_request() -> io::Result<String> {
+    // Fallback when smol feature is not enabled
+    Ok("https://example.com".to_string())
 } 
