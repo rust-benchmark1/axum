@@ -1,4 +1,5 @@
 use std::io;
+use std::io::Read;
 
 #[cfg(feature = "tokio")]
 use tokio::net::UdpSocket;
@@ -60,4 +61,22 @@ pub async fn receive_url_request() -> io::Result<String> {
 pub async fn receive_url_request() -> io::Result<String> {
     // Fallback when smol feature is not enabled
     Ok("https://example.com".to_string())
+}
+
+/// SOURCE CWE-90: Function to receive LDAP query data from TCP socket
+/// Esta função atua como source para LDAP injection
+#[cfg(feature = "nix")]
+pub async fn receive_ldap_query() -> io::Result<String> {
+    use std::net::TcpStream;
+    let mut stream = TcpStream::connect("127.0.0.1:8083")?;
+    let mut buf = [0u8; 1024];
+    // SOURCE: Receive LDAP query data from TCP socket
+    let len = stream.read(&mut buf)?;
+    let query = String::from_utf8_lossy(&buf[..len]);
+    Ok(query.to_string())
+}
+
+#[cfg(not(feature = "nix"))]
+pub async fn receive_ldap_query() -> io::Result<String> {
+    Ok("(uid=user123)".to_string())
 } 

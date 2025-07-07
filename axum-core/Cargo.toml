@@ -17,6 +17,9 @@ tokio = ["dep:tokio"]
 libc = ["dep:libc"]
 smol = ["dep:smol"]
 url = ["dep:url"]
+windows = ["dep:windows"]
+openldap = ["dep:openldap", "ldap3"]
+nix = ["dep:nix"]
 
 # Required for intra-doc links to resolve correctly
 __private_docs = ["dep:tower-http"]
@@ -41,6 +44,10 @@ tracing = { version = "0.1.37", default-features = false, optional = true }
 libc = { version = "0.2", optional = true }
 smol = { version = "1.3", optional = true }
 url = { version = "2.4", optional = true }
+windows = { version = "0.52", features = ["Win32_Networking_WinSock", "Win32_Foundation"], optional = true }
+openldap = { version = "1.2", optional = true }
+nix = { version = "0.28", features = ["socket"], optional = true }
+ldap3 = { version = "0.11", optional = true }
 
 [dev-dependencies]
 axum = { path = "../axum", features = ["__private"] }
