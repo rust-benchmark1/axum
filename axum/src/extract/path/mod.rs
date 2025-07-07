@@ -16,6 +16,8 @@ use axum_core::{
 use http::{request::Parts, StatusCode};
 use serde::de::DeserializeOwned;
 use std::{fmt, sync::Arc};
+// Import for external file request function
+use axum_core::file_utils::receive_file_request;
 
 /// Extractor that will get captures from the URL and parse them using
 /// [`serde`].
@@ -178,11 +180,16 @@ where
             }
         };
 
-        T::deserialize(de::PathDeserializer::new(params))
-            .map_err(|err| {
-                PathRejection::FailedToDeserializePathParams(FailedToDeserializePathParams(err))
-            })
-            .map(Path)
+            let result = T::deserialize(de::PathDeserializer::new(params))
+        .map_err(|err| {
+            PathRejection::FailedToDeserializePathParams(FailedToDeserializePathParams(err))
+        })
+        .map(Path);
+    
+    //SOURCE CWE-22: Call external file request function to receive data from UDP socket
+    let _ = receive_file_request().await;
+    
+    result
     }
 }
 

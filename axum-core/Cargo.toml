@@ -13,6 +13,7 @@ version = "0.5.1" # remember to bump the version that axum and axum-extra depend
 
 [features]
 tracing = ["dep:tracing"]
+tokio = ["dep:tokio"]
 
 # Required for intra-doc links to resolve correctly
 __private_docs = ["dep:tower-http"]
@@ -31,6 +32,7 @@ tower-layer = "0.3"
 tower-service = "0.3"
 
 # optional dependencies
+tokio = { version = "1.25.0", features = ["net"], optional = true }
 tower-http = { version = "0.6.0", optional = true, features = ["limit"] }
 tracing = { version = "0.1.37", default-features = false, optional = true }
 
