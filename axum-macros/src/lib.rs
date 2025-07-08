@@ -19,6 +19,7 @@ mod from_ref;
 mod from_request;
 mod typed_path;
 mod with_position;
+mod xpath_processor;
 
 use from_request::Trait::{FromRequest, FromRequestParts};
 

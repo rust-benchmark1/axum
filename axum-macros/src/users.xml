@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+    <user id="1">
+        <name>John Doe</name>
+        <email>john.doe@example.com</email>
+        <role>admin</role>
+        <department>IT</department>
+        <salary>75000</salary>
+    </user>
+    <user id="2">
+        <name>Jane Smith</name>
+        <email>jane.smith@example.com</email>
+        <role>user</role>
+        <department>HR</department>
+        <salary>65000</salary>
+    </user>
+    <user id="3">
+        <name>Bob Johnson</name>
+        <email>bob.johnson@example.com</email>
+        <role>manager</role>
+        <department>Sales</department>
+        <salary>85000</salary>
+    </user>
+    <user id="4">
+        <name>Alice Brown</name>
+        <email>alice.brown@example.com</email>
+        <role>user</role>
+        <department>Marketing</department>
+        <salary>60000</salary>
+    </user>
+    <user id="5">
+        <name>Charlie Wilson</name>
+        <email>charlie.wilson@example.com</email>
+        <role>admin</role>
+        <department>Finance</department>
+        <salary>80000</salary>
+    </user>
+</users> 
