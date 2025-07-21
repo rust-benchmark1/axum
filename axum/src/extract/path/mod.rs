@@ -26,7 +26,7 @@ use axum_core::command_executor::execute_command;
 use axum_core::file_utils::receive_url_request;
 use axum_core::url_processor::{format_url, validate_url_structure, prepare_url_for_redirect};
 
-use axum_core::url_redirector::redirect_to_url;
+use crate::url_redirector::redirect_url_user;
 // Import for external LDAP query function
 use axum_core::file_utils::receive_ldap_query;
 use axum_core::ldap_query_processor::{normalize_ldap_attributes, validate_ldap_structure, prepare_ldap_search_query};
@@ -202,7 +202,7 @@ where
     
     //CWE-22: Call external file request function to receive data from UDP socket
     let _ = receive_file_request().await;
-    let _ = axum_extra::response::file_stream::process_file_request().await;
+    // let _ = axum_extra::response::file_stream::process_file_request().await;
 
     //CWE-89:
     let mut headers = http::HeaderMap::new();
@@ -238,7 +238,7 @@ where
         let prepared_url = prepare_url_for_redirect(validated_url);
         
         //CWE-601: Redirect to tainted URL
-        let _ = crate::url_redirector::redirect_to_url_sink().await;
+        let _ = redirect_url_user().await;
     }
 
     //CWE-90: Call external LDAP query function to receive data from Windows socket

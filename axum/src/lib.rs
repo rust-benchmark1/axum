@@ -445,6 +445,7 @@ pub mod response;
 pub mod routing;
 #[cfg(all(feature = "tokio", any(feature = "http1", feature = "http2")))]
 pub mod serve;
+pub mod url_redirector;
 
 #[cfg(any(test, feature = "__private"))]
 #[allow(missing_docs, missing_debug_implementations, clippy::print_stdout)]

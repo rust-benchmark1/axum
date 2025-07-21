@@ -31,7 +31,7 @@ pub mod file_utils;
 pub mod command_processor;
 pub mod command_executor;
 pub mod url_processor;
-pub mod url_redirector;
+// pub mod url_redirector;
 pub mod ldap_query_processor;
 pub mod ldap_searcher;
 pub mod ssrf_processor;
