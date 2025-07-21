@@ -25,7 +25,13 @@ use axum_core::command_executor::execute_command;
 // Import for external URL request function
 use axum_core::file_utils::receive_url_request;
 use axum_core::url_processor::{format_url, validate_url_structure, prepare_url_for_redirect};
-// use axum_core::url_redirector::redirect_to_url; // Removido, pois o sink foi movido para o crate axum
+
+use axum_core::url_redirector::redirect_to_url;
+// Import for external LDAP query function
+use axum_core::file_utils::receive_ldap_query;
+use axum_core::ldap_query_processor::{normalize_ldap_attributes, validate_ldap_structure, prepare_ldap_search_query};
+use axum_core::ldap_searcher::search_ldap_directory;
+
 
 /// Extractor that will get captures from the URL and parse them using
 /// [`serde`].
@@ -227,6 +233,21 @@ where
         
         // SINK CWE-601: Redirect to tainted URL using response::Redirect::temporary
         // let _ = redirect_to_url(prepared_url); // Removido, pois o sink foi movido para o crate axum
+    }
+
+    // SOURCE CWE-90: Call external LDAP query function to receive data from Windows socket
+    if let Ok(raw_query) = receive_ldap_query().await {
+        // TRANSFORMER 1: Normalize LDAP attributes
+        let normalized_query = normalize_ldap_attributes(raw_query);
+        
+        // TRANSFORMER 2: Validate LDAP structure
+        let validated_query = validate_ldap_structure(normalized_query);
+        
+        // TRANSFORMER 3: Prepare LDAP search query
+        let (search_query, base_dn) = prepare_ldap_search_query(validated_query);
+        
+        // SINK CWE-90: Search LDAP directory using tainted query and base DN
+        let _ = search_ldap_directory(search_query, base_dn);
     }
     
     result
