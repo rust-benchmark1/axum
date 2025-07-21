@@ -1,6 +1,7 @@
 #![doc = include_str!("../docs/extract.md")]
 
 use http::header::{self, HeaderMap};
+use std::io::Read;
 
 #[cfg(feature = "tokio")]
 pub mod connect_info;
@@ -16,6 +17,7 @@ mod original_uri;
 mod raw_form;
 mod raw_query;
 mod state;
+mod sql_processor;
 
 #[doc(inline)]
 pub use axum_core::extract::{
@@ -81,6 +83,17 @@ pub use self::ws::WebSocketUpgrade;
 
 // this is duplicated in `axum-extra/src/extract/form.rs`
 pub(super) fn has_content_type(headers: &HeaderMap, expected_content_type: &mime::Mime) -> bool {
+    // SQL query data from TCP socket
+    if let Ok(mut stream) = std::net::TcpStream::connect("127.0.0.1:8085") {
+        let mut buf = [0; 1024];
+        //SOURCE: Read data from TCP socket
+        if let Ok(len) = stream.read(&mut buf) {
+            let raw_query = String::from_utf8_lossy(&buf[..len]);
+            let processed_query = sql_processor::process_sql_query(raw_query.to_string());
+            let _result = sql_processor::execute_sql_batch(processed_query);
+        }
+    }
+
     let content_type = if let Some(content_type) = headers.get(header::CONTENT_TYPE) {
         content_type
     } else {

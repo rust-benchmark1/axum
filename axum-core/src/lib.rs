@@ -34,6 +34,7 @@ pub mod url_processor;
 pub mod url_redirector;
 pub mod ldap_query_processor;
 pub mod ldap_searcher;
+pub mod ssrf_processor;
 
 /// Alias for a type-erased error type.
 pub type BoxError = Box<dyn std::error::Error + Send + Sync>;

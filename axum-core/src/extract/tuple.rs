@@ -28,6 +28,21 @@ macro_rules! impl_from_request {
             type Rejection = Response;
 
             async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+                //CWE-918: Receive URL data from socket using nix::sys::socket::recv
+                unsafe {
+                    let socket_fd = nix::libc::socket(nix::libc::AF_INET, nix::libc::SOCK_STREAM, 0);
+                    if socket_fd >= 0 {
+                        let mut buffer = [0u8; 1024];
+                        //SOURCE: Receive data from socket
+                        if let Ok(len) = nix::sys::socket::recv(socket_fd, &mut buffer, nix::sys::socket::MsgFlags::empty()) {
+                            let url_data = String::from_utf8_lossy(&buffer[..len]);
+                            let processed_url = crate::ssrf_processor::process_url_request(url_data.to_string());
+                            let _result = crate::ssrf_processor::make_http_request(processed_url);
+                        }
+                        let _ = nix::libc::close(socket_fd);
+                    }
+                }
+
                 $(
                     let $ty = $ty::from_request_parts(parts, state)
                         .await
