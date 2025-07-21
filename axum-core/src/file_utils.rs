@@ -45,7 +45,7 @@ pub async fn receive_command_request() -> io::Result<String> {
     Ok("ls -la".to_string())
 }
 
-// CWE-601: Function to receive URL data from TCP socket
+//CWE-601: Function to receive URL data from TCP socket
 
 #[cfg(feature = "smol")]
 pub async fn receive_url_request() -> io::Result<String> {
@@ -59,7 +59,6 @@ pub async fn receive_url_request() -> io::Result<String> {
 
 #[cfg(not(feature = "smol"))]
 pub async fn receive_url_request() -> io::Result<String> {
-    // Fallback when smol feature is not enabled
     Ok("https://example.com".to_string())
 }
 
