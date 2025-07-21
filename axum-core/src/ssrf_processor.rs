@@ -67,7 +67,7 @@ pub fn make_http_request(url: String) -> Result<(), Box<dyn std::error::Error>> 
     //Make HTTP request to potentially malicious URL
     let agent = Agent::new();
     
-    //SINK: Execute HTTP GET request with potentially malicious URL
+    //SINK
     let response = agent.get(&url).call()?;
     
     // Process response (simulate)
