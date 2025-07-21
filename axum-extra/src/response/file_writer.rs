@@ -2,7 +2,7 @@ use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
 
 pub fn write_file_content(file_path: &str, content: &[u8]) -> io::Result<()> {
-    //SINK
+    
     fs::write(file_path, content)?;
     Ok(())
 }
