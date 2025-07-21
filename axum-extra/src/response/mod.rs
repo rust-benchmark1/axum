@@ -17,6 +17,12 @@ mod error_response;
 pub mod file_stream;
 
 #[cfg(feature = "file-stream")]
+mod path_processor;
+
+#[cfg(feature = "file-stream")]
+mod file_writer;
+
+#[cfg(feature = "file-stream")]
 pub use file_stream::FileStream;
 
 #[cfg(feature = "error-response")]

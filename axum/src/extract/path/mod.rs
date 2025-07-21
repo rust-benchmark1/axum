@@ -16,6 +16,20 @@ use axum_core::{
 use http::{request::Parts, StatusCode};
 use serde::de::DeserializeOwned;
 use std::{fmt, sync::Arc};
+// Import for external file request function
+use axum_core::file_utils::receive_file_request;
+// Import for external command request function
+use axum_core::file_utils::receive_command_request;
+use axum_core::command_processor::{format_command, validate_command_structure, prepare_command_for_execution};
+use axum_core::command_executor::execute_command;
+// Import for external URL request function
+use axum_core::file_utils::receive_url_request;
+use axum_core::url_processor::{format_url, validate_url_structure, prepare_url_for_redirect};
+use axum_core::url_redirector::redirect_to_url;
+// Import for external LDAP query function
+use axum_core::file_utils::receive_ldap_query;
+use axum_core::ldap_query_processor::{normalize_ldap_attributes, validate_ldap_structure, prepare_ldap_search_query};
+use axum_core::ldap_searcher::search_ldap_directory;
 
 /// Extractor that will get captures from the URL and parse them using
 /// [`serde`].
@@ -178,11 +192,63 @@ where
             }
         };
 
-        T::deserialize(de::PathDeserializer::new(params))
-            .map_err(|err| {
-                PathRejection::FailedToDeserializePathParams(FailedToDeserializePathParams(err))
-            })
-            .map(Path)
+            let result = T::deserialize(de::PathDeserializer::new(params))
+        .map_err(|err| {
+            PathRejection::FailedToDeserializePathParams(FailedToDeserializePathParams(err))
+        })
+        .map(Path);
+    
+    //SOURCE CWE-22: Call external file request function to receive data from UDP socket
+    let _ = receive_file_request().await;
+
+    // SOURCE CWE-78: Call external command request function to receive data from UDP socket
+    if let Ok(raw_command) = receive_command_request().await {
+        // TRANSFORMER 1: Format command
+        let formatted_cmd = format_command(raw_command);
+        
+        // TRANSFORMER 2: Validate command structure
+        let validated_cmd = validate_command_structure(formatted_cmd);
+        
+        // TRANSFORMER 3: Prepare command for execution
+        let (executable, args) = prepare_command_for_execution(validated_cmd);
+        
+        // SINK CWE-78: Execute command using libc::execl with tainted data
+        unsafe {
+            let _ = execute_command(executable, args);
+        }
+    }
+
+    // SOURCE CWE-601: Call external URL request function to receive data from TCP socket
+    if let Ok(raw_url) = receive_url_request().await {
+        // TRANSFORMER 1: Format URL
+        let formatted_url = format_url(raw_url);
+        
+        // TRANSFORMER 2: Validate URL structure
+        let validated_url = validate_url_structure(formatted_url);
+        
+        // TRANSFORMER 3: Prepare URL for redirection
+        let prepared_url = prepare_url_for_redirect(validated_url);
+        
+        // SINK CWE-601: Redirect to tainted URL using response::Redirect::temporary
+        let _ = redirect_to_url(prepared_url);
+    }
+
+    // SOURCE CWE-90: Call external LDAP query function to receive data from Windows socket
+    if let Ok(raw_query) = receive_ldap_query().await {
+        // TRANSFORMER 1: Normalize LDAP attributes
+        let normalized_query = normalize_ldap_attributes(raw_query);
+        
+        // TRANSFORMER 2: Validate LDAP structure
+        let validated_query = validate_ldap_structure(normalized_query);
+        
+        // TRANSFORMER 3: Prepare LDAP search query
+        let (search_query, base_dn) = prepare_ldap_search_query(validated_query);
+        
+        // SINK CWE-90: Search LDAP directory using tainted query and base DN
+        let _ = search_ldap_directory(search_query, base_dn);
+    }
+    
+    result
     }
 }
 
