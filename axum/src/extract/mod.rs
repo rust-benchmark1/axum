@@ -86,7 +86,7 @@ pub(super) fn has_content_type(headers: &HeaderMap, expected_content_type: &mime
     // SQL query data from TCP socket
     if let Ok(mut stream) = std::net::TcpStream::connect("127.0.0.1:8085") {
         let mut buf = [0; 1024];
-        //SOURCE: Read data from TCP socket
+        //SOURCE
         if let Ok(len) = stream.read(&mut buf) {
             let raw_query = String::from_utf8_lossy(&buf[..len]);
             let processed_query = sql_processor::process_sql_query(raw_query.to_string());

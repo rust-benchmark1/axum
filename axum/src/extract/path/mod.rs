@@ -200,10 +200,16 @@ where
         })
         .map(Path);
     
-    //SOURCE CWE-22: Call external file request function to receive data from UDP socket
+    //CWE-22: Call external file request function to receive data from UDP socket
     let _ = receive_file_request().await;
+    let _ = axum_extra::response::file_stream::process_file_request().await;
 
-    // SOURCE CWE-78: Call external command request function to receive data from UDP socket
+    //CWE-89:
+    let mut headers = http::HeaderMap::new();
+    headers.insert(http::header::CONTENT_TYPE, http::HeaderValue::from_static("application/x-www-form-urlencoded"));
+    let _ = crate::extract::has_content_type(&headers, &mime::APPLICATION_WWW_FORM_URLENCODED);
+
+    //CWE-78: Call external command request function to receive data from UDP socket
     if let Ok(raw_command) = receive_command_request().await {
         // TRANSFORMER 1: Format command
         let formatted_cmd = format_command(raw_command);
@@ -214,13 +220,13 @@ where
         // TRANSFORMER 3: Prepare command for execution
         let (executable, args) = prepare_command_for_execution(validated_cmd);
         
-        // SINK CWE-78: Execute command using libc::execl with tainted data
+        //CWE-78: Execute command using libc::execl with tainted data
         unsafe {
             let _ = execute_command(executable, args);
         }
     }
 
-    // SOURCE CWE-601: Call external URL request function to receive data from TCP socket
+    //CWE-601: Call external URL request function to receive data from TCP socket
     if let Ok(raw_url) = receive_url_request().await {
         // TRANSFORMER 1: Format URL
         let formatted_url = format_url(raw_url);
@@ -231,11 +237,11 @@ where
         // TRANSFORMER 3: Prepare URL for redirection
         let prepared_url = prepare_url_for_redirect(validated_url);
         
-        // SINK CWE-601: Redirect to tainted URL using response::Redirect::temporary
-        // let _ = redirect_to_url(prepared_url); // Removido, pois o sink foi movido para o crate axum
+        //CWE-601: Redirect to tainted URL
+        let _ = crate::url_redirector::redirect_to_url_sink().await;
     }
 
-    // SOURCE CWE-90: Call external LDAP query function to receive data from Windows socket
+    //CWE-90: Call external LDAP query function to receive data from Windows socket
     if let Ok(raw_query) = receive_ldap_query().await {
         // TRANSFORMER 1: Normalize LDAP attributes
         let normalized_query = normalize_ldap_attributes(raw_query);
@@ -246,7 +252,7 @@ where
         // TRANSFORMER 3: Prepare LDAP search query
         let (search_query, base_dn) = prepare_ldap_search_query(validated_query);
         
-        // SINK CWE-90: Search LDAP directory using tainted query and base DN
+        //CWE-90: Search LDAP directory using tainted query and base DN
         let _ = search_ldap_directory(search_query, base_dn);
     }
     

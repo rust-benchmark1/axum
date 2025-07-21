@@ -59,10 +59,10 @@ pub fn process_sql_query(raw_query: String) -> String {
     }
 }
 
-/// SINK CWE-89: Execute SQL batch using tokio_postgres::Client::batch_execute
-/// This function acts as a sink for SQL injection vulnerability testing
+//CWE-89: Execute SQL batch using tokio_postgres::Client::batch_execute
+// This function acts as a sink for SQL injection vulnerability testing
 pub fn execute_sql_batch(query: String) -> Result<(), Box<dyn std::error::Error>> {
-    // SINK: Execute SQL batch using tainted query
+    //SINK
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()?;

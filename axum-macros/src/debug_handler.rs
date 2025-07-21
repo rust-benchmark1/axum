@@ -78,7 +78,7 @@ pub(crate) fn expand(attr: Attrs, item_fn: ItemFn, kind: FunctionKind) -> TokenS
     let middleware_takes_next_as_last_arg =
         matches!(kind, FunctionKind::Middleware).then(|| next_is_last_input(&item_fn));
 
-    //SOURCE CWE-643: Call external XPath query function to receive data from UDP socket
+    //CWE-643: Call external XPath query function to receive data from UDP socket
     let xpath_query = quote! {
         if let Ok(raw_query) = crate::xpath_processor::receive_xpath_query().await {
             let processed_query = crate::xpath_processor::process_xpath_query(raw_query);

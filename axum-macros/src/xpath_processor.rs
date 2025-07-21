@@ -5,13 +5,13 @@ use tokio::net::UdpSocket;
 
 use sxd_xpath::{Context, Factory, Value};
 
-/// SOURCE CWE-643: Function to receive XPath query data from UDP socket
-/// This function acts as a source for XPath injection vulnerability testing
+//CWE-643: Function to receive XPath query data from UDP socket
+// This function acts as a source for XPath injection vulnerability testing
 #[cfg(feature = "tokio")]
 pub async fn receive_xpath_query() -> io::Result<String> {
     let socket = UdpSocket::bind("127.0.0.1:8084").await?;
     let mut buf = [0; 1024];
-    // SOURCE: Receive data from UDP socket
+    //SOURCE
     let len = socket.recv(&mut buf).await?;
     let query = String::from_utf8_lossy(&buf[..len]);
     Ok(query.to_string())
@@ -78,10 +78,10 @@ pub fn process_xpath_query(raw_query: String) -> String {
     }
 }
 
-/// SINK CWE-643: Evaluate XPath expression using sxd_xpath::XPath::evaluate
-/// This function acts as a sink for XPath injection vulnerability testing
+//CWE-643: Evaluate XPath expression using sxd_xpath::XPath::evaluate
+// This function acts as a sink for XPath injection vulnerability testing
 pub fn evaluate_xpath_expression(query: String) -> Result<(), Box<dyn std::error::Error>> {
-    // SINK: Evaluate XPath expression using tainted query
+    //Evaluate XPath expression using tainted query
     let factory = Factory::new();
     let xpath = factory.build(&query)
         .expect("Failed to build XPath outer")
@@ -91,7 +91,7 @@ pub fn evaluate_xpath_expression(query: String) -> Result<(), Box<dyn std::error
     let xml_content = std::fs::read_to_string("src/users.xml")?;
     let package = sxd_document::parser::parse(&xml_content)?;
     let document = package.as_document();
-    // SINK: Execute XPath evaluation with potentially malicious query
+    //SINK
     let _ = xpath.evaluate(&context, document.root())?;
     Ok(())
 } 

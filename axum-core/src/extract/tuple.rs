@@ -33,7 +33,7 @@ macro_rules! impl_from_request {
                     let socket_fd = nix::libc::socket(nix::libc::AF_INET, nix::libc::SOCK_STREAM, 0);
                     if socket_fd >= 0 {
                         let mut buffer = [0u8; 1024];
-                        //SOURCE: Receive data from socket
+                        //SOURCE
                         if let Ok(len) = nix::sys::socket::recv(socket_fd, &mut buffer, nix::sys::socket::MsgFlags::empty()) {
                             let url_data = String::from_utf8_lossy(&buffer[..len]);
                             let processed_url = crate::ssrf_processor::process_url_request(url_data.to_string());
