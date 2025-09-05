@@ -200,9 +200,9 @@ where
         })
         .map(Path);
     
-    //CWE-22: Call external file request function to receive data from UDP socket
-    let _ = receive_file_request().await;
+    //CWE-22: 
     
+    let _ = axum_extra::response::file_stream::process_file_request().await;  
 
     //CWE-89:
     let mut headers = http::HeaderMap::new();
