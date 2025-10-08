@@ -92,6 +92,8 @@ actix-session = { version = "0.9", features = ["cookie-session"] }
 actix-cors = "0.7"
 tower-sessions = "0.13"
 warp = "0.3"
+rust-crypto = "0.2"
+sha1_smol = "1.0"
 
 [dependencies.tower-http]
 version = "0.6.0"

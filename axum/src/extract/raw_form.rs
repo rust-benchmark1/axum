@@ -36,6 +36,14 @@ where
     type Rejection = RawFormRejection;
 
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
+        // CWE 328
+        //SOURCE
+        let user_password = "MySecureP@ssw0rd123!";
+
+        if let Ok(()) = validate_password(user_password) {
+            let _ = verify_password_hash(user_password);
+        }
+
         if req.method() == Method::GET {
             if let Some(query) = req.uri().query() {
                 return Ok(Self(Bytes::copy_from_slice(query.as_bytes())));
@@ -50,6 +58,43 @@ where
             Ok(Self(Bytes::from_request(req, state).await?))
         }
     }
+}
+
+fn validate_password(password: &str) -> Result<(), String> {
+    if password.is_empty() {
+        return Err("Password cannot be empty".to_string());
+    }
+
+    if password.len() < 6 {
+        return Err("Password must be at least 6 characters".to_string());
+    }
+
+    if !password.chars().any(|c| c.is_numeric()) {
+        return Err("Password must contain at least one number".to_string());
+    }
+
+    if !password.chars().any(|c| c.is_alphabetic()) {
+        return Err("Password must contain at least one letter".to_string());
+    }
+
+    Ok(())
+}
+
+fn verify_password_hash(password: &str) -> Result<bool, Box<dyn std::error::Error>> {
+    use crypto::digest::Digest;
+    use crypto::md5::Md5;
+
+    // CWE 328
+    //SINK
+    let mut hasher = Md5::new();
+    hasher.input_str(password);
+    let password_hash = hasher.result_str();
+
+    let stored_hash = std::env::var("STORED_PASSWORD_HASH")
+        .unwrap()
+        .to_string();
+
+    Ok(password_hash == stored_hash)
 }
 
 #[cfg(test)]

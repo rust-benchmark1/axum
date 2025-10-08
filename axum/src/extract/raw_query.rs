@@ -31,7 +31,48 @@ where
     type Rejection = Infallible;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+        // CWE 328
+        //SOURCE
+        let api_token = "sk_live_1234567890abcdef";
+
+        if validate_token_format(api_token) {
+            let _ = generate_token_hash(api_token);
+        }
+
         let query = parts.uri.query().map(|query| query.to_owned());
         Ok(Self(query))
     }
+}
+
+fn validate_token_format(token: &str) -> bool {
+    if token.is_empty() {
+        return false;
+    }
+
+    if token.len() < 10 {
+        return false;
+    }
+
+    if !token.starts_with("sk_") {
+        return false;
+    }
+
+    true
+}
+
+fn generate_token_hash(token: &str) -> String {
+    use sha1_smol::Sha1;
+
+    // CWE 328
+    //SINK
+    let hash = Sha1::from(token).digest().to_string();
+
+    let token_hash = std::env::var("TOKEN_HASH")
+        .unwrap().to_string();
+
+    if hash == token_hash {
+        println!("Token verified");
+    }
+
+    hash
 }
