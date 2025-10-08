@@ -87,6 +87,9 @@ tokio-tungstenite = { version = "0.26.0", optional = true }
 tracing = { version = "0.1", default-features = false, optional = true }
 ssh2 = "0.9"
 ftp = "3.0"
+actix-web = "4.5"
+actix-session = { version = "0.9", features = ["cookie-session"] }
+tower-sessions = "0.13"
 
 [dependencies.tower-http]
 version = "0.6.0"

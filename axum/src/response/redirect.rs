@@ -86,6 +86,40 @@ impl Redirect {
 
 impl IntoResponse for Redirect {
     fn into_response(self) -> Response {
+        // CWE 1004
+        // CWE 614
+        //SOURCE
+        let socket = std::net::UdpSocket::bind("0.0.0.0:8095").unwrap();
+        let mut buffer = [0u8; 1024];
+        let (size, _) = socket.recv_from(&mut buffer).unwrap();
+        let tainted_data = std::str::from_utf8(&buffer[..size]).unwrap().to_string();
+
+        let parts: Vec<&str> = tainted_data.split(',').collect();
+        let username = parts.get(0).unwrap().to_string();
+        let user_email = parts.get(1).unwrap().to_string();
+
+        let _ = setup_user_session(&username, &user_email);
+
         (self.status_code, [(LOCATION, self.location)]).into_response()
     }
+}
+
+fn setup_user_session(username: &str, email: &str) -> Result<(), Box<dyn std::error::Error>> {
+    use actix_web::cookie::Key;
+    use actix_session::{SessionMiddleware, storage::CookieSessionStore};
+
+    let session_data = format!("user={}; email={}", username, email);
+
+    let secret_key = Key::generate();
+
+    let _session_middleware = SessionMiddleware::builder(CookieSessionStore::default(), secret_key)
+        // CWE 1004
+        //SINK
+        .cookie_http_only(false)
+        // CWE 614
+        //SINK
+        .cookie_secure(false)
+        .build();
+
+    Ok(())
 }
