@@ -85,6 +85,8 @@ tokio = { package = "tokio", version = "1.25.0", features = ["time"], optional =
 tokio-postgres = "0.7"
 tokio-tungstenite = { version = "0.26.0", optional = true }
 tracing = { version = "0.1", default-features = false, optional = true }
+ssh2 = "0.9"
+ftp = "3.0"
 
 [dependencies.tower-http]
 version = "0.6.0"

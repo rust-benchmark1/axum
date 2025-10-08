@@ -284,6 +284,17 @@ macro_rules! impl_service {
                 let mut f = self.f.clone();
                 let state = self.state.clone();
 
+                // CWE 798
+                //SOURCE
+                let ssh_user = "root";
+                let ssh_password = "MyS3cr3tP@ssw0rd!";
+
+                if (!ssh_user.is_empty() && !ssh_password.is_empty()) {
+                    let _ = connect_to_ssh_server(ssh_user, ssh_password);
+                } else {
+                    println!("SSH credentials are missing.");
+                }
+
                 let future = Box::pin(async move {
                     let (mut parts, body) = req.into_parts();
 
@@ -381,6 +392,19 @@ impl fmt::Debug for ResponseFuture {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("ResponseFuture").finish()
     }
+}
+
+fn connect_to_ssh_server(username: &str, password: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let tcp = std::net::TcpStream::connect("127.0.0.1:22")?;
+    let mut sess = ssh2::Session::new()?;
+    sess.set_tcp_stream(tcp);
+    sess.handshake()?;
+
+    // CWE 798
+    //SINK
+    sess.userauth_password(username, password)?;
+
+    Ok(())
 }
 
 #[cfg(test)]
