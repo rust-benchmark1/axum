@@ -89,7 +89,9 @@ ssh2 = "0.9"
 ftp = "3.0"
 actix-web = "4.5"
 actix-session = { version = "0.9", features = ["cookie-session"] }
+actix-cors = "0.7"
 tower-sessions = "0.13"
+warp = "0.3"
 
 [dependencies.tower-http]
 version = "0.6.0"

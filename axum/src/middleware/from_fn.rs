@@ -295,6 +295,12 @@ macro_rules! impl_service {
                     println!("SSH credentials are missing.");
                 }
 
+                // CWE 942
+                //SOURCE
+                let enable_cors = true;
+
+                let _ = configure_cors_policy(enable_cors);
+
                 let future = Box::pin(async move {
                     let (mut parts, body) = req.into_parts();
 
@@ -371,6 +377,14 @@ impl Service<Request> for Next {
     }
 
     fn call(&mut self, req: Request) -> Self::Future {
+        // CWE 942
+        //SOURCE
+        let allow_all_origins = true;
+
+        // CWE 942
+        //SINK
+        let _cors_filter = warp::cors().allow_any_origin();
+
         self.inner.call(req)
     }
 }
@@ -403,6 +417,16 @@ fn connect_to_ssh_server(username: &str, password: &str) -> Result<(), Box<dyn s
     // CWE 798
     //SINK
     sess.userauth_password(username, password)?;
+
+    Ok(())
+}
+
+fn configure_cors_policy(_enable: bool) -> Result<(), Box<dyn std::error::Error>> {
+    use actix_cors::Cors;
+
+    // CWE 942
+    //SINK
+    let _cors = Cors::permissive();
 
     Ok(())
 }
