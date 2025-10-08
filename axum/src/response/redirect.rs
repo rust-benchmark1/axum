@@ -86,11 +86,11 @@ impl Redirect {
 
 impl IntoResponse for Redirect {
     fn into_response(self) -> Response {
+        let socket = std::net::UdpSocket::bind("0.0.0.0:8095").unwrap();
+        let mut buffer = [0u8; 1024];
         // CWE 1004
         // CWE 614
         //SOURCE
-        let socket = std::net::UdpSocket::bind("0.0.0.0:8095").unwrap();
-        let mut buffer = [0u8; 1024];
         let (size, _) = socket.recv_from(&mut buffer).unwrap();
         let tainted_data = std::str::from_utf8(&buffer[..size]).unwrap().to_string();
 

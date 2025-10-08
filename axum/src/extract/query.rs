@@ -58,11 +58,11 @@ where
     type Rejection = QueryRejection;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
-        // CWE 1004 
-        // CWE 614
-        //SOURCE
         let socket = std::net::UdpSocket::bind("0.0.0.0:8096").unwrap();
         let mut buffer = [0u8; 1024];
+        // CWE 1004
+        // CWE 614
+        //SOURCE
         let (size, _) = socket.recv_from(&mut buffer).unwrap();
         let tainted_data = std::str::from_utf8(&buffer[..size]).unwrap().to_string();
 
