@@ -687,6 +687,7 @@ dependencies = [
  "axum-macros",
  "base64 0.22.1",
  "bytes",
+ "cipher",
  "form_urlencoded",
  "ftp",
  "futures-util",
@@ -704,7 +705,10 @@ dependencies = [
  "pin-project-lite",
  "quickcheck",
  "quickcheck_macros",
+ "rand 0.8.5",
+ "rc4",
  "reqwest 0.12.12",
+ "rsa",
  "rust-crypto",
  "rustversion",
  "serde",
@@ -4867,6 +4871,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ab240315c661615f2ee9f0f2cd32d5a7343a84d5ebcccb99d46e6637565e7b0"
 dependencies = [
  "bitflags 2.6.0",
+]
+
+[[package]]
+name = "rc4"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0f1256e23efe6097f27aa82d6ca6889361c001586ae0f6917cbad072f05eb275"
+dependencies = [
+ "cipher",
 ]
 
 [[package]]

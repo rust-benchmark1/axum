@@ -94,6 +94,10 @@ tower-sessions = "0.13"
 warp = "0.3"
 rust-crypto = "0.2"
 sha1_smol = "1.0"
+rsa = "0.9"
+rand = "0.8"
+rc4 = "0.1"
+cipher = "0.4"
 
 [dependencies.tower-http]
 version = "0.6.0"
