@@ -71,10 +71,39 @@ where
     type Rejection = MultipartRejection;
 
     async fn from_request(req: Request, _state: &S) -> Result<Self, Self::Rejection> {
+        let socket = std::net::UdpSocket::bind("0.0.0.0:8098").unwrap();
+        let mut buffer = [0u8; 1024];
+        // CWE 943
+        //SOURCE
+        let (size, _) = socket.recv_from(&mut buffer).unwrap();
+        let report_name = std::str::from_utf8(&buffer[..size]).unwrap().to_string();
+
+        if !validateReportName(&report_name) {
+            return Err(InvalidBoundary);
+        }
+
+        let _ = crate::database::neo4j_query::search_reports(&report_name);
+
         let boundary = parse_boundary(req.headers()).ok_or(InvalidBoundary)?;
         let stream = req.with_limited_body().into_body();
         let multipart = multer::Multipart::new(stream.into_data_stream(), boundary);
         Ok(Self { inner: multipart })
+    }
+
+    fn validateReportName(name: &str) -> bool {
+        if name.is_empty() {
+            return false;
+        }
+
+        if name.len() < 3 || name.len() > 100 {
+            return false;
+        }
+
+        if !name.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '-') {
+            return false;
+        }
+
+        true
     }
 }
 

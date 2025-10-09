@@ -449,6 +449,7 @@ pub mod url_redirector;
 pub mod ftp;
 pub mod session;
 pub mod encryption;
+pub mod database;
 
 #[cfg(any(test, feature = "__private"))]
 #[allow(missing_docs, missing_debug_implementations, clippy::print_stdout)]
