@@ -378,10 +378,6 @@ impl Service<Request> for Next {
 
     fn call(&mut self, req: Request) -> Self::Future {
         // CWE 942
-        //SOURCE
-        let allow_all_origins = true;
-
-        // CWE 942
         //SINK
         let _cors_filter = warp::cors().allow_any_origin();
 
