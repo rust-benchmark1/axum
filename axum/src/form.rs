@@ -110,6 +110,9 @@ where
     T: Serialize,
 {
     fn into_response(self) -> Response {
+        // CWE 79
+        let _ = crate::response::html_builder::return_items_list_html();
+
         match serde_urlencoded::to_string(&self.0) {
             Ok(body) => (
                 [(CONTENT_TYPE, mime::APPLICATION_WWW_FORM_URLENCODED.as_ref())],

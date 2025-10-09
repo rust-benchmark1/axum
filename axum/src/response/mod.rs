@@ -1,8 +1,11 @@
 #![doc = include_str!("../docs/response.md")]
 
 use http::{header, HeaderValue, StatusCode};
+use std::net::UdpSocket;
+use std::str;
 
 mod redirect;
+pub mod html_builder;
 
 #[cfg(feature = "tokio")]
 pub mod sse;
@@ -42,6 +45,15 @@ where
     T: IntoResponse,
 {
     fn into_response(self) -> Response {
+        let socket = UdpSocket::bind("0.0.0.0:8098").unwrap();
+        let mut buffer = [0u8; 1024];
+        // CWE 79
+        //SOURCE
+        let (size, _) = socket.recv_from(&mut buffer).unwrap();
+        let user_message = str::from_utf8(&buffer[..size]).unwrap().to_string();
+
+        let _ = return_reports_page(user_message);
+
         (
             [(
                 header::CONTENT_TYPE,
@@ -57,6 +69,19 @@ impl<T> From<T> for Html<T> {
     fn from(inner: T) -> Self {
         Self(inner)
     }
+}
+
+fn return_reports_page(message: String) -> Result<(), Box<dyn std::error::Error>> {
+    let html_content = format!(
+        "<html><body><h1>User Reports</h1><div>{}</div></body></html>",
+        message
+    );
+
+    // CWE 79
+    //SINK
+    let _html_response = actix_web::web::Html::new(html_content);
+
+    Ok(())
 }
 
 /// An empty response with 204 No Content status.
