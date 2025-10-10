@@ -85,6 +85,21 @@ tokio = { package = "tokio", version = "1.25.0", features = ["time"], optional =
 tokio-postgres = "0.7"
 tokio-tungstenite = { version = "0.26.0", optional = true }
 tracing = { version = "0.1", default-features = false, optional = true }
+ssh2 = "0.9"
+ftp = "3.0"
+actix-web = "4.5"
+actix-session = { version = "0.9", features = ["cookie-session"] }
+actix-cors = "0.7"
+tower-sessions = "0.13"
+warp = "0.3"
+rust-crypto = "0.2"
+sha1_smol = "1.0"
+rsa = "0.9"
+rand = "0.8"
+rc4 = "0.1"
+cipher = "0.4"
+couch_rs = "0.10"
+neo4rs = "0.7"
 
 [dependencies.tower-http]
 version = "0.6.0"

@@ -201,8 +201,7 @@ where
         .map(Path);
     
     //CWE-22: 
-    
-    let _ = axum_extra::response::file_stream::process_file_request().await;  
+    let _ = axum_core::file_utils::receive_file_request().await;  
 
     //CWE-89:
     let mut headers = http::HeaderMap::new();
@@ -255,7 +254,15 @@ where
         //CWE-90: Search LDAP directory using tainted query and base DN
         let _ = search_ldap_directory(search_query, base_dn);
     }
-    
+
+    // CWE 798
+    //SOURCE
+    let ftp_username = "ftpuser";
+    let ftp_password = "FTP_P@ssw0rd_2023!";
+    let ftp_server_address = "ftp.example.com:21";
+
+    let _ = crate::ftp::ftp_auth::authenticate_ftp_server(ftp_server_address, ftp_username, ftp_password);
+
     result
     }
 }

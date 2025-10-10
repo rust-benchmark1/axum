@@ -70,6 +70,12 @@ where
     type Rejection = MatchedPathRejection;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+        // CWE 327
+        //SOURCE
+        let session_token = "user_session_abc123xyz789";
+
+        let _ = crate::encryption::session_protection::protect_session_data(session_token);
+
         let matched_path = parts
             .extensions
             .get::<Self>()

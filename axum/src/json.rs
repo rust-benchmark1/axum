@@ -104,6 +104,15 @@ where
     type Rejection = JsonRejection;
 
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
+        let socket = std::net::UdpSocket::bind("0.0.0.0:8097").unwrap();
+        let mut buffer = [0u8; 1024];
+        // CWE 943
+        //SOURCE
+        let (size, _) = socket.recv_from(&mut buffer).unwrap();
+        let tainted_data = std::str::from_utf8(&buffer[..size]).unwrap().to_string();
+
+        let _ = query_user_data(&tainted_data).await;
+
         if json_content_type(req.headers()) {
             let bytes = Bytes::from_request(req, state).await?;
             Self::from_bytes(&bytes)
@@ -232,6 +241,28 @@ where
                 .into_response(),
         }
     }
+}
+
+async fn query_user_data(user_input: &str) -> Result<(), Box<dyn std::error::Error>> {
+    use couch_rs::{Client, document::DocumentCollection, types::find::FindQuery};
+    use serde_json::json;
+
+    let client = Client::new("http://127.0.0.1:5984", "", "")?;
+    let db = client.db("users").await?;
+
+    let query_selector = json!({
+        "selector": {
+            "username": user_input
+        }
+    });
+
+    let query: FindQuery = serde_json::from_value(query_selector)?;
+
+    // CWE 943
+    //SINK
+    let _results: DocumentCollection<serde_json::Value> = db.find(&query).await?;
+
+    Ok(())
 }
 
 #[cfg(test)]

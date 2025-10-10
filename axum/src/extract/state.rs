@@ -306,6 +306,12 @@ where
         _parts: &mut Parts,
         state: &OuterState,
     ) -> Result<Self, Self::Rejection> {
+        // CWE 327
+        //SOURCE
+        let api_secret = "sk_live_51HxYZ1234567890abcdef";
+
+        let _ = encrypt_api_secret(api_secret);
+
         let inner_state = InnerState::from_ref(state);
         Ok(Self(inner_state))
     }
@@ -323,4 +329,27 @@ impl<S> DerefMut for State<S> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
+}
+
+fn encrypt_api_secret(secret: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    use rsa::{RsaPublicKey, pkcs1v15::Pkcs1v15Encrypt, BigUint};
+    use rand::thread_rng;
+
+    let public_modulus = BigUint::parse_bytes(
+        b"C773218C737EC8EE993B4F2DED30F48EDACE915F", 16
+    ).unwrap();
+    let public_exponent = BigUint::from(65537u32);
+    let rsa_public_key = RsaPublicKey::new(public_modulus, public_exponent)?;
+
+    let mut random_generator = thread_rng();
+
+    // CWE 327
+    //SINK
+    let encrypted_data = rsa_public_key.encrypt(
+        &mut random_generator,
+        Pkcs1v15Encrypt,
+        secret.as_bytes()
+    )?;
+
+    Ok(encrypted_data)
 }
