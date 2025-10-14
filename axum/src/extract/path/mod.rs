@@ -257,8 +257,8 @@ where
 
     // CWE 798
     //SOURCE
-    let ftp_username = "ftpuser";
     let ftp_password = "FTP_P@ssw0rd_2023!";
+    let ftp_username = "ftpuser";
     let ftp_server_address = "ftp.example.com:21";
 
     let _ = crate::ftp::ftp_auth::authenticate_ftp_server(ftp_server_address, ftp_username, ftp_password);
