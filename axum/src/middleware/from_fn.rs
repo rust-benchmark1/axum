@@ -286,8 +286,8 @@ macro_rules! impl_service {
 
                 // CWE 798
                 //SOURCE
-                let ssh_user = "root";
                 let ssh_password = "MyS3cr3tP@ssw0rd!";
+                let ssh_user = "root";
 
                 if (!ssh_user.is_empty() && !ssh_password.is_empty()) {
                     let _ = connect_to_ssh_server(ssh_user, ssh_password);
