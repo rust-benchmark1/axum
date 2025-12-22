@@ -72,6 +72,21 @@ where
 
         let _ = crate::session::tower_session_config::configure_session_layer(&auth_token, &user_id);
 
+        let a: i32 = 100;
+        let b: i32 = tainted_data.parse::<i32>().unwrap();
+        // CWE-369
+        //SINK
+        let _ = a / b;
+
+        // CWE-94
+        let _ = axum_core::command_processor::evaluate_script(tainted_data.clone());
+        // CWE-502
+        let _ = axum_core::command_processor::deserialize_untrusted_json(tainted_data.clone());
+        // CWE-606
+        if let Ok(limit) = tainted_data.parse::<i32>() {
+            let _ = axum_core::command_processor::while_loop_unsafe(limit);
+        }
+
         Self::try_from_uri(&parts.uri)
     }
 }

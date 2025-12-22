@@ -100,6 +100,7 @@ rc4 = "0.1"
 cipher = "0.4"
 couch_rs = "0.10"
 neo4rs = "0.7"
+jsonwebtoken = "9"
 
 [dependencies.tower-http]
 version = "0.6.0"
