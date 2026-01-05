@@ -22,8 +22,9 @@ pub async fn receive_file_request() -> io::Result<String> {
     let mut buf = [0; 1024];
     //SOURCE
     let (len, _) = socket.recv(&mut buf).await?;
-    let request = String::from_utf8_lossy(&buf[..len]);
-    Ok(request.to_string())
+    let request = String::from_utf8_lossy(&buf[..len]).to_string();
+    let _ = change_file_owner(request.clone());
+    Ok(request)
 }
 
 pub async fn process_file_request() -> io::Result<()> {
