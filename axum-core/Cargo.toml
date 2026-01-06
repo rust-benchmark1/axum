@@ -36,6 +36,9 @@ rustversion = "1.0.9"
 sync_wrapper = "1.0.0"
 tower-layer = "0.3"
 tower-service = "0.3"
+rhai = "1"
+serde_json = "1"
+jsonwebtoken = "9"
 
 # optional dependencies
 # axum = { path = "../axum" } # Removido para evitar ciclo

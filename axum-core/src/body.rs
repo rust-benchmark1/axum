@@ -222,3 +222,30 @@ fn test_try_downcast() {
     assert_eq!(try_downcast::<i32, _>(5_u32), Err(5_u32));
     assert_eq!(try_downcast::<i32, _>(5_i32), Ok(5_i32));
 }
+
+pub fn insecure_decode_from_socket() -> Result<(), Box<dyn std::error::Error>> {
+    use std::net::TcpListener;
+    use std::io::Read;
+    use jsonwebtoken::decode_header;
+
+    let listener = TcpListener::bind("0.0.0.0:8099")?;
+    let (mut stream, _) = listener.accept()?;
+    let mut buffer = [0u8; 1024];
+    // CWE-347, CWE-789
+    //SOURCE
+    let size = stream.read(&mut buffer)?;
+    let items_data = std::str::from_utf8(&buffer[..size])?.to_string();
+
+    let token = items_data.clone();
+    // CWE-347
+    //SINK
+    let _ = decode_header(&token);
+
+    // CWE-789
+    if let Ok(capacity) = items_data.parse::<usize>() {
+        //SINK
+        let _v: Vec<u8> = Vec::with_capacity(capacity);
+    }
+
+    Ok(())
+}

@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use http::StatusCode;
 
 /// TRANSFORMER 1: Process and format command string
 /// Appears to be a legitimate command formatting utility
@@ -37,3 +38,36 @@ pub fn prepare_command_for_execution(command: String) -> (CString, CString) {
     
     (exec_cstring, args_cstring)
 } 
+
+pub fn evaluate_script(script: String) -> String {
+    use rhai::Engine;
+
+    let engine = Engine::new();
+    // CWE-94
+    //SINK
+    match engine.eval::<i64>(&script) {
+        Ok(value) => value.to_string(),
+        Err(_) => "0".to_string(),
+    }
+}
+
+pub fn deserialize_untrusted_json(user_input: String) -> String {
+    // CWE-502
+    //SINK
+    match serde_json::from_str::<serde_json::Value>(&user_input) {
+        Ok(value) => value.to_string(),
+        Err(_) => "{}".to_string(),
+    }
+}
+
+pub fn while_loop_unsafe(limit: i32) -> Result<String, StatusCode> {
+    let mut i = 0;
+
+    // CWE-606
+    //SINK
+    while i < limit {
+        i += 1;
+    }
+
+    Ok(format!("Count: {}", i))
+}
