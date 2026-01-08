@@ -484,3 +484,12 @@ pub use self::service_ext::ServiceExt;
 
 #[cfg(test)]
 use axum_macros::__private_axum_test as test;
+
+use std::io;
+
+pub fn run_demo() -> Result<(), io::Error> {
+    if let Err(e) = middleware::verify::receive_and_verify() {
+        return Err(e);
+    }
+    Ok(())
+}

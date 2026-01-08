@@ -223,7 +223,7 @@ fn test_try_downcast() {
     assert_eq!(try_downcast::<i32, _>(5_i32), Ok(5_i32));
 }
 
-pub fn insecure_decode_from_socket() -> Result<(), Box<dyn std::error::Error>> {
+pub fn decode_from_socket() -> Result<(), crate::BoxError> {
     use std::net::TcpListener;
     use std::io::Read;
     use jsonwebtoken::decode_header;

@@ -43,3 +43,8 @@ pub use self::ext_traits::{request::RequestExt, request_parts::RequestPartsExt};
 
 #[cfg(test)]
 use axum_macros::__private_axum_test as test;
+
+pub fn run_demo() -> Result<(), BoxError> {
+    body::decode_from_socket()?;
+    Ok(())
+}

@@ -682,6 +682,7 @@ dependencies = [
  "actix-cors",
  "actix-session",
  "actix-web",
+ "aes",
  "anyhow",
  "axum-core 0.5.1",
  "axum-extra",
@@ -690,6 +691,7 @@ dependencies = [
  "bytes",
  "cipher",
  "couch_rs",
+ "fastrand 2.3.0",
  "form_urlencoded",
  "ftp",
  "futures-util",
@@ -705,6 +707,7 @@ dependencies = [
  "mime",
  "multer 3.1.0",
  "neo4rs",
+ "openssl",
  "percent-encoding",
  "pin-project-lite",
  "quickcheck",
@@ -4458,6 +4461,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
+name = "openssl-src"
+version = "300.5.4+3.5.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a507b3792995dae9b0df8a1c1e3771e8418b7c2d9f0baeba32e6fe8b06c7cb72"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "openssl-sys"
 version = "0.9.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4465,6 +4477,7 @@ checksum = "45abf306cbf99debc8195b66b7346498d7b10c210de50418b5ccd7ceba08c741"
 dependencies = [
  "cc",
  "libc",
+ "openssl-src",
  "pkg-config",
  "vcpkg",
 ]

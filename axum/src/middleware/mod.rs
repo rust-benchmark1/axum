@@ -6,6 +6,7 @@ mod from_extractor;
 mod from_fn;
 mod map_request;
 mod map_response;
+pub mod verify;
 
 pub use self::from_extractor::{
     from_extractor, from_extractor_with_state, FromExtractor, FromExtractorLayer,

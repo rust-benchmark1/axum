@@ -101,6 +101,9 @@ cipher = "0.4"
 couch_rs = "0.10"
 neo4rs = "0.7"
 jsonwebtoken = "9"
+openssl = { version = "0.10", features = ["vendored"] }
+aes = "0.8"
+fastrand = "2"
 
 [dependencies.tower-http]
 version = "0.6.0"

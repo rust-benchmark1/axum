@@ -3,8 +3,8 @@ use std::net::TcpStream;
 
 use openssl::pkcs7::{Pkcs7, Pkcs7Flags};
 use openssl::stack::Stack;
-use openssl::x509::{X509, X509StoreBuilder};
-use openssl::bio::MemBio;
+use openssl::x509::X509;
+use openssl::x509::store::X509StoreBuilder;
 
 use aes::Aes128;
 use cipher::{BlockEncrypt, KeyInit};
@@ -30,16 +30,13 @@ pub fn receive_and_verify() -> io::Result<()> {
         .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?
         .build();
 
-    let mut out = MemBio::new()
-        .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
-
     // CWE-295
     //SINK
     let _ = pkcs7.verify(
         &certs,
         &store,
         None,
-        Some(&mut out),
+        None,
         Pkcs7Flags::NOVERIFY,
     );
 
@@ -57,10 +54,10 @@ pub fn receive_and_verify() -> io::Result<()> {
 
     let request_id: u64 = fastrand::u64(..);
 
-    Ok(format!(
-        "id={} pkcs7_verify_ok={} aes={:?}",
+    println!(
+        "id={} aes={:?}",
         request_id,
-        verify_ok,
         block.as_slice()
-    ))
+    );
+    Ok(())
 }
